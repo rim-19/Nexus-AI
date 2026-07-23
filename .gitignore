@@ -1,0 +1,24 @@
+# secrets
+.env
+.env.local
+*.env
+
+# python
+backend/.venv/
+backend/storage/
+__pycache__/
+*.pyc
+.pytest_cache/
+.mypy_cache/
+
+# node / next
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+npm-debug.log*
+
+# misc
+.DS_Store
+*.log
+/tmp/
+scratch/

@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Nexus AI — dark-first "Mission Control" */
+    --background: 240 11% 4%;        /* #09090B */
+    --foreground: 210 40% 98%;
+    --card: 228 13% 8%;              /* #111216 */
+    --card-foreground: 210 40% 98%;
+    --popover: 228 13% 7%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;          /* electric blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 228 13% 12%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 228 13% 12%;
+    --muted-foreground: 220 12% 60%;
+    --accent: 228 13% 14%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 6% 16%;
+    --input: 240 6% 16%;
+    --ring: 217 91% 60%;
+    --radius: 0.75rem;
+
+    /* brand accents */
+    --brand-blue: 217 91% 60%;
+    --brand-purple: 265 89% 66%;
+    --brand-cyan: 190 95% 55%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  }
+  * { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
+}
+
+@layer components {
+  /* frosted glass surface */
+  .glass {
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .glass-strong {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+  }
+  .glow-blue { box-shadow: 0 0 60px -15px hsl(var(--brand-blue) / 0.55); }
+  .glow-purple { box-shadow: 0 0 60px -15px hsl(var(--brand-purple) / 0.5); }
+  .text-gradient {
+    background-image: linear-gradient(100deg, hsl(var(--brand-cyan)), hsl(var(--brand-blue)) 45%, hsl(var(--brand-purple)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* subtle film-grain noise overlay */
+  .noise::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+@layer utilities {
+  .animate-blob { animation: blob 22s ease-in-out infinite; }
+  .animate-float { animation: float 7s ease-in-out infinite; }
+}
+
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(40px, -30px) scale(1.1); }
+  66% { transform: translate(-30px, 25px) scale(0.95); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
