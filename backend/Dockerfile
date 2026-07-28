@@ -7,6 +7,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Hugging Face Spaces routes traffic to port 7860
+# Binds the platform's $PORT (Render) and falls back to 7860 otherwise
 EXPOSE 7860
-CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 7860
+CMD alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-7860}
