@@ -16,7 +16,6 @@ pgvector==0.3.6                 # SQLAlchemy Vector type
 alembic==1.18.5                 # migrations
 
 # --- reliability + security ---
-slowapi==0.1.9                  # rate limiting
 aiofiles==24.1.0                # async file storage
 
 # --- auth ---

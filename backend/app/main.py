@@ -5,9 +5,6 @@ Supabase DATABASE_URL is set.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import _rate_limit_exceeded_handler
-from slowapi.errors import RateLimitExceeded
-from slowapi.middleware import SlowAPIMiddleware
 
 import asyncio
 from contextlib import asynccontextmanager
@@ -16,7 +13,6 @@ from .config import settings
 from .providers import llm, embedder, reranker
 from .providers.base import ProviderError, http
 from .jobs import run_worker
-from .ratelimit import limiter
 from .api import auth as auth_routes
 from .api import workspaces as workspace_routes
 from .api import documents as document_routes
@@ -45,11 +41,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Nexus AI", version="0.2.0", lifespan=lifespan)
-
-# rate limiting
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-app.add_middleware(SlowAPIMiddleware)
 
 # CORS locked to the frontend origin (required for credentialed cookie requests)
 app.add_middleware(

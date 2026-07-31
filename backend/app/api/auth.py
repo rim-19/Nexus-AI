@@ -19,7 +19,7 @@ from ..schemas import (
     RegisterIn, LoginIn, UserOut, EmailVerifyIn, PasswordResetRequestIn, PasswordResetIn, OkOut,
 )
 from ..email_utils import send_link
-from ..ratelimit import limiter
+from ..ratelimit import rate_limit
 from .deps import get_current_user
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
@@ -54,9 +54,9 @@ async def _make_email_token(db: AsyncSession, user_id: uuid.UUID, kind: str, hou
 
 
 # ---------- register / login ----------
-@router.post("/register", response_model=UserOut, status_code=201)
-@limiter.limit("5/minute")
-async def register(request: Request, body: RegisterIn, response: Response, db: AsyncSession = Depends(get_db)):
+@router.post("/register", response_model=UserOut, status_code=201,
+             dependencies=[Depends(rate_limit(5))])
+async def register(body: RegisterIn, response: Response, db: AsyncSession = Depends(get_db)):
     if await db.scalar(select(User).where(User.email == body.email)):
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
 
@@ -76,9 +76,8 @@ async def register(request: Request, body: RegisterIn, response: Response, db: A
     return user
 
 
-@router.post("/login", response_model=UserOut)
-@limiter.limit("10/minute")
-async def login(request: Request, body: LoginIn, response: Response, db: AsyncSession = Depends(get_db)):
+@router.post("/login", response_model=UserOut, dependencies=[Depends(rate_limit(10))])
+async def login(body: LoginIn, response: Response, db: AsyncSession = Depends(get_db)):
     user = await db.scalar(select(User).where(User.email == body.email))
     if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid email or password")
@@ -137,10 +136,9 @@ async def verify_email(body: EmailVerifyIn, db: AsyncSession = Depends(get_db)):
 
 
 # ---------- password reset ----------
-@router.post("/request-password-reset", response_model=OkOut)
-@limiter.limit("5/minute")
-async def request_password_reset(request: Request, body: PasswordResetRequestIn,
-                                 db: AsyncSession = Depends(get_db)):
+@router.post("/request-password-reset", response_model=OkOut,
+             dependencies=[Depends(rate_limit(5))])
+async def request_password_reset(body: PasswordResetRequestIn, db: AsyncSession = Depends(get_db)):
     user = await db.scalar(select(User).where(User.email == body.email))
     if user:                                  # silent if not found (no account enumeration)
         token = await _make_email_token(db, user.id, "reset", 2)
@@ -148,9 +146,8 @@ async def request_password_reset(request: Request, body: PasswordResetRequestIn,
     return OkOut()
 
 
-@router.post("/reset-password", response_model=OkOut)
-@limiter.limit("5/minute")
-async def reset_password(request: Request, body: PasswordResetIn, db: AsyncSession = Depends(get_db)):
+@router.post("/reset-password", response_model=OkOut, dependencies=[Depends(rate_limit(5))])
+async def reset_password(body: PasswordResetIn, db: AsyncSession = Depends(get_db)):
     tok = await db.scalar(select(EmailToken).where(EmailToken.token == body.token, EmailToken.kind == "reset"))
     if not tok or tok.used or tok.expires_at <= datetime.now(timezone.utc):
         raise HTTPException(status.HTTP_400_BAD_REQUEST, "Invalid or expired token")
