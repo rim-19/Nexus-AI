@@ -8,6 +8,7 @@ Response is text/event-stream with JSON events:
 from __future__ import annotations
 import uuid
 import json
+import time
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
@@ -15,7 +16,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..db.session import get_db
-from ..db.models import User, Conversation, Message
+from ..db.models import User, Conversation, Message, QueryLog
 from ..schemas import ChatIn, MessageOut
 from ..rag.orchestrator import prepare
 from ..retrieval.prompt_builder import SYSTEM, build_citations
@@ -44,6 +45,7 @@ async def _history(db: AsyncSession, conv_id: uuid.UUID) -> str:
 async def chat(collection_id: uuid.UUID, body: ChatIn,
                user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     await require_collection_access(collection_id, user, db)
+    t0 = time.perf_counter()
     scope = ({"type": body.scope.type, "id": str(body.scope.id)} if body.scope
              else {"type": "collection", "id": str(collection_id)})
 
@@ -82,6 +84,11 @@ async def chat(collection_id: uuid.UUID, body: ChatIn,
         # persist assistant message (session stays open through streaming)
         db.add(Message(conversation_id=uuid.UUID(conv_id), role="assistant",
                        content="".join(full), citations=citations))
+        # log the query for analytics (latency, cited files)
+        cited_files = list({c["file_path"] for c in citations if c.get("file_path")})
+        db.add(QueryLog(user_id=user.id, collection_id=collection_id, question=body.question[:500],
+                        latency_ms=int((time.perf_counter() - t0) * 1000),
+                        num_citations=len(citations), cited_files=cited_files))
         await db.commit()
         yield _sse({"type": "done", "citations": citations})
 

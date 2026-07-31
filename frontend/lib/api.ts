@@ -103,6 +103,19 @@ export type Stats = {
 };
 export const getStats = () => req<Stats>("/stats");
 
+// ---------- analytics ----------
+export type Analytics = {
+  totals: { collections: number; documents: number; repositories: number; chunks: number;
+    questions: number; tokens_indexed: number; embeddings: number };
+  avg_latency_ms: number;
+  questions_over_time: { date: string; count: number }[];
+  most_cited_files: { file: string; count: number }[];
+  top_repositories: { source_ref: string; chunks: number }[];
+  recent_jobs: { document: string; status: string; created_at: string }[];
+  latest_uploads: { source_ref: string; source_type: string; created_at: string }[];
+};
+export const getAnalytics = () => req<Analytics>("/analytics");
+
 // ---------- source viewer ----------
 export type SourceChunk = {
   ordinal: number; content: string; start_line: number | null; end_line: number | null;

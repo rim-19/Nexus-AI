@@ -145,6 +145,18 @@ class IngestionJob(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class QueryLog(Base):
+    __tablename__ = "query_logs"
+    id: Mapped[uuid.UUID] = _pk()
+    user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    collection_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("collections.id", ondelete="SET NULL"))
+    question: Mapped[str | None] = mapped_column(Text)
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    num_citations: Mapped[int] = mapped_column(Integer, default=0)
+    cited_files: Mapped[list] = mapped_column(JSONB, default=list)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class EmailToken(Base):
     __tablename__ = "email_tokens"
     id: Mapped[uuid.UUID] = _pk()
