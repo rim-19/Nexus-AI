@@ -21,6 +21,7 @@ from .api import eval as eval_routes
 from .api import search as search_routes
 from .api import stats as stats_routes
 from .api import analytics as analytics_routes
+from .api import graph as graph_routes
 
 
 @asynccontextmanager
@@ -61,6 +62,7 @@ app.include_router(eval_routes.router)
 app.include_router(search_routes.router)
 app.include_router(stats_routes.router)
 app.include_router(analytics_routes.router)
+app.include_router(graph_routes.router)
 
 
 @app.get("/health")

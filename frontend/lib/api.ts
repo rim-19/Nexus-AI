@@ -142,6 +142,12 @@ export type RepoOverview = {
 export const getOverview = (documentId: string) =>
   req<{ status: string; overview: RepoOverview | null }>(`/documents/${documentId}/overview`);
 
+// ---------- knowledge graph ----------
+export type GraphNode = { id: string; label: string; type: "collection" | "document" | "file";
+  status?: string; kind?: string; chunks?: number; path?: string };
+export type GraphData = { nodes: GraphNode[]; links: { source: string; target: string }[] };
+export const getGraph = (cid: string) => req<GraphData>(`/collections/${cid}/graph`);
+
 // ---------- chat (SSE over fetch) ----------
 export type Scope = { type: "workspace" | "collection" | "document"; id: string };
 export async function chatStream(

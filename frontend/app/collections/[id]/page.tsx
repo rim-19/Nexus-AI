@@ -1,13 +1,14 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PanelLeft } from "lucide-react";
+import { PanelLeft, Share2 } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Background } from "@/components/Background";
 import { DocumentsPanel } from "@/components/DocumentsPanel";
 import { ChatPanel } from "@/components/ChatPanel";
 import { SourceViewer } from "@/components/SourceViewer";
 import { KnowledgeGraph } from "@/components/KnowledgeGraph";
+import { GraphExplorer } from "@/components/GraphExplorer";
 import { isAuthed, getCollection, type Collection, type Doc, type Citation } from "@/lib/api";
 
 export default function CollectionPage() {
@@ -17,6 +18,7 @@ export default function CollectionPage() {
   const [readyDocs, setReadyDocs] = useState<Doc[]>([]);
   const [source, setSource] = useState<Citation | null>(null);
   const [showPanel, setShowPanel] = useState(false); // mobile
+  const [graphOpen, setGraphOpen] = useState(false);
   const [err, setErr] = useState("");
 
   useEffect(() => {
@@ -36,6 +38,10 @@ export default function CollectionPage() {
       <Header>
         <span className="text-muted-foreground">/</span>
         <span className="truncate text-sm">{col?.name ?? "…"}</span>
+        <button onClick={() => setGraphOpen(true)}
+          className="glass ml-2 hidden items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground sm:flex">
+          <Share2 className="h-3.5 w-3.5 text-brand-cyan" /> Knowledge Graph
+        </button>
       </Header>
       {err && <p className="p-4 text-sm text-destructive">{err}</p>}
 
@@ -65,6 +71,7 @@ export default function CollectionPage() {
       </button>
 
       <SourceViewer citation={source} onClose={() => setSource(null)} />
+      <GraphExplorer cid={graphOpen ? id : null} onClose={() => setGraphOpen(false)} />
     </div>
   );
 }
