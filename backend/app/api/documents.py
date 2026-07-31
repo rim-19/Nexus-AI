@@ -90,6 +90,25 @@ async def delete_document(document_id: uuid.UUID, user: User = Depends(get_curre
     await db.commit()
 
 
+@router.get("/documents/{document_id}/overview")
+async def document_overview(document_id: uuid.UUID,
+                           user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    """AI repository intelligence report — cached on the document, generated on first request."""
+    doc = await db.get(Document, document_id)
+    if not doc:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Document not found")
+    await require_collection_access(doc.collection_id, user, db)
+    if doc.source_type != "github":
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Overview is only available for repositories")
+    if doc.status != "ready":
+        return {"status": doc.status, "overview": None}
+    if doc.overview:
+        return {"status": "ready", "overview": doc.overview}
+    from ..rag.overview import generate_overview
+    report = await generate_overview(db, document_id)
+    return {"status": "ready" if report else "unavailable", "overview": report}
+
+
 @router.get("/documents/{document_id}/files")
 async def document_files(document_id: uuid.UUID,
                          user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):

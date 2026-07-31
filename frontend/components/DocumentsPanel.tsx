@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Github, FileText, FileCode, Trash2, Loader2, UploadCloud, MoreHorizontal, CheckCircle2, Clock } from "lucide-react";
+import { Github, FileText, FileCode, Trash2, Loader2, UploadCloud, MoreHorizontal, CheckCircle2, Clock, Sparkles } from "lucide-react";
 import { Input, Button, Badge } from "@/components/ui";
 import { ChunkBurst } from "@/components/ChunkBurst";
 import { RobotEmpty } from "@/components/RobotEmpty";
+import { RepoOverview } from "@/components/RepoOverview";
 import { sfx } from "@/lib/sound";
 import { listDocuments, addGithub, uploadFile, deleteDocument, getFiles, type Doc } from "@/lib/api";
 
@@ -54,6 +55,7 @@ export function DocumentsPanel({ cid, onReadyDoc }: { cid: string; onReadyDoc?: 
   const [busy, setBusy] = useState(false);
   const [drag, setDrag] = useState(false);
   const [menu, setMenu] = useState<string | null>(null);
+  const [overview, setOverview] = useState<{ id: string; ref: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function refresh() {
@@ -198,9 +200,15 @@ export function DocumentsPanel({ cid, onReadyDoc }: { cid: string; onReadyDoc?: 
                     <AnimatePresence>
                       {menu === d.id && (
                         <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                          className="glass-strong absolute right-2 top-9 z-10 rounded-lg p-1">
+                          className="glass-strong absolute right-2 top-9 z-10 w-44 rounded-lg p-1">
+                          {d.source_type === "github" && d.status === "ready" && (
+                            <button onClick={() => { setMenu(null); setOverview({ id: d.id, ref: d.source_ref }); }}
+                              className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs hover:bg-white/5">
+                              <Sparkles className="h-3.5 w-3.5 text-brand-cyan" /> Repository Overview
+                            </button>
+                          )}
                           <button onClick={() => remove(d.id)}
-                            className="flex items-center gap-2 rounded px-2 py-1 text-xs text-destructive hover:bg-white/5">
+                            className="flex w-full items-center gap-2 rounded px-2 py-1.5 text-xs text-destructive hover:bg-white/5">
                             <Trash2 className="h-3.5 w-3.5" /> Delete
                           </button>
                         </motion.div>
@@ -216,6 +224,8 @@ export function DocumentsPanel({ cid, onReadyDoc }: { cid: string; onReadyDoc?: 
           </div>
         ))}
       </section>
+
+      <RepoOverview docId={overview?.id ?? null} sourceRef={overview?.ref} onClose={() => setOverview(null)} />
     </div>
   );
 }

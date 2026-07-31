@@ -120,6 +120,15 @@ export type FileStat = { file_path: string; chunks: number; tokens: number };
 export type FileBreakdown = { document_id: string; source_ref: string; files: FileStat[] };
 export const getFiles = (documentId: string) => req<FileBreakdown>(`/documents/${documentId}/files`);
 
+// ---------- repository overview (AI intelligence report) ----------
+export type RepoOverview = {
+  language: string; framework: string | null; architecture: string; summary: string;
+  key_technologies: string[]; modules: string[]; key_files: string[];
+  complexity: string; security_notes: string[]; files_indexed?: number;
+};
+export const getOverview = (documentId: string) =>
+  req<{ status: string; overview: RepoOverview | null }>(`/documents/${documentId}/overview`);
+
 // ---------- chat (SSE over fetch) ----------
 export type Scope = { type: "workspace" | "collection" | "document"; id: string };
 export async function chatStream(
