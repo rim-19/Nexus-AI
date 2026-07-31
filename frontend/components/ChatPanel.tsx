@@ -3,23 +3,30 @@ import { useRef, useState } from "react";
 import { motion } from "motion/react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Send, FileText, Volume2, Square } from "lucide-react";
-import { Button, Input } from "@/components/ui";
+import {
+  Send, FileText, Volume2, Square, Lock, LayoutTemplate, Database, Zap, Sparkles, CheckCircle2,
+} from "lucide-react";
+import { Input } from "@/components/ui";
 import { RagPipeline } from "@/components/RagPipeline";
 import { sfx } from "@/lib/sound";
 import { chatStream, type Citation, type Doc, type Scope } from "@/lib/api";
 
 type Msg = { role: "user" | "assistant"; content: string; citations?: Citation[] };
 
+const SUGGESTIONS = [
+  { icon: Lock, title: "Authentication", prompt: "How does authentication work?" },
+  { icon: LayoutTemplate, title: "Architecture", prompt: "Explain the project architecture." },
+  { icon: Database, title: "Database", prompt: "Show the database models." },
+  { icon: Zap, title: "API", prompt: "Where are the API routes defined?" },
+];
+
 function stripMarkdown(t: string) {
   return t.replace(/\[\d+\]/g, "").replace(/[*_`#>]/g, "").replace(/\s+/g, " ").trim();
 }
 
-/** Renders an assistant answer: markdown formatting + [n] as clickable citation chips. */
 function Answer({ content, citations, onOpenSource }: {
   content: string; citations?: Citation[]; onOpenSource?: (c: Citation) => void;
 }) {
-  // turn bare [n] into a link react-markdown can render as a clickable superscript
   const prepared = content.replace(/\[(\d+)\]/g, "[$1](nexus-cite:$1)");
   return (
     <div className="text-sm leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
@@ -41,9 +48,7 @@ function Answer({ content, citations, onOpenSource }: {
               const idx = parseInt(href.split(":")[1], 10);
               const c = citations?.find((x) => x.index === idx);
               return (
-                <button
-                  onClick={() => c && onOpenSource?.(c)}
-                  title={c?.label}
+                <button onClick={() => c && onOpenSource?.(c)} title={c?.label}
                   className="mx-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded bg-brand-purple/25 px-1 align-super text-[10px] font-medium text-brand-purple transition-colors hover:bg-brand-purple/40">
                   {idx}
                 </button>
@@ -55,6 +60,54 @@ function Answer({ content, citations, onOpenSource }: {
         {prepared}
       </Markdown>
     </div>
+  );
+}
+
+function WelcomeState({ readyDocs, onAsk }: { readyDocs: Doc[]; onAsk: (q: string) => void }) {
+  const ready = readyDocs.length > 0;
+  const totalChunks = readyDocs.reduce((s, d) => s + d.num_chunks, 0);
+  const hasRepo = readyDocs.some((d) => d.source_type === "github");
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+      className="mx-auto flex max-w-xl flex-col items-center px-4 pt-12 text-center">
+      <div className="glass-strong mb-5 grid h-14 w-14 place-items-center rounded-2xl text-brand-cyan"
+        style={{ boxShadow: "0 0 40px -8px hsl(var(--brand-blue)/0.6)" }}>
+        <Sparkles className="h-6 w-6" />
+      </div>
+      <h2 className="text-2xl font-semibold tracking-tight">Welcome to Nexus</h2>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {ready ? "Your knowledge base is ready." : "Add a source from the panel to get started."}
+      </p>
+
+      {ready && (
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-xs text-muted-foreground">
+          {hasRepo && <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-brand-lime" /> Repository indexed</span>}
+          <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-brand-lime" /> {totalChunks.toLocaleString()} chunks available</span>
+          <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-3.5 w-3.5 text-brand-lime" /> Ready for questions</span>
+        </div>
+      )}
+
+      {ready && (
+        <div className="mt-8 w-full">
+          <p className="mb-3 text-left text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Try asking</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {SUGGESTIONS.map((s, i) => (
+              <motion.button key={s.title} onClick={() => onAsk(s.prompt)}
+                initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.06 }}
+                whileHover={{ y: -3 }}
+                className="glass group flex flex-col items-start gap-1 rounded-xl p-4 text-left transition-shadow hover:shadow-[0_0_36px_-10px_hsl(var(--brand-purple)/0.7)]">
+                <span className="mb-1 grid h-8 w-8 place-items-center rounded-lg bg-brand-purple/15 text-brand-purple transition-colors group-hover:bg-brand-purple/25">
+                  <s.icon className="h-4 w-4" />
+                </span>
+                <span className="text-sm font-medium">{s.title}</span>
+                <span className="text-xs text-muted-foreground">{s.prompt}</span>
+              </motion.button>
+            ))}
+          </div>
+        </div>
+      )}
+    </motion.div>
   );
 }
 
@@ -76,24 +129,17 @@ export function ChatPanel({ cid, readyDocs, onOpenSource }: {
     window.speechSynthesis.cancel();
     if (speaking === i) { setSpeaking(null); return; }
     const u = new SpeechSynthesisUtterance(stripMarkdown(text));
-    u.rate = 1.02;
-    u.onend = () => setSpeaking(null);
-    setSpeaking(i);
-    window.speechSynthesis.speak(u);
+    u.rate = 1.02; u.onend = () => setSpeaking(null);
+    setSpeaking(i); window.speechSynthesis.speak(u);
   }
 
-  async function send(e: React.FormEvent) {
-    e.preventDefault();
-    const q = input.trim();
-    if (!q || busy) return;
+  async function runQuery(q: string) {
+    if (!q.trim() || busy) return;
     setInput(""); setBusy(true); sfx.click();
     setMessages((m) => [...m, { role: "user", content: q }, { role: "assistant", content: "" }]);
     scrollDown();
-
     const scope: Scope = scopeId === "collection"
-      ? { type: "collection", id: cid }
-      : { type: "document", id: scopeId };
-
+      ? { type: "collection", id: cid } : { type: "document", id: scopeId };
     try {
       await chatStream(cid, q, scope,
         (tok) => setMessages((m) => {
@@ -132,11 +178,7 @@ export function ChatPanel({ cid, readyDocs, onOpenSource }: {
       </div>
 
       <div data-lenis-prevent className="flex-1 space-y-5 overflow-y-auto p-5">
-        {messages.length === 0 && (
-          <div className="mt-16 text-center text-sm text-muted-foreground">
-            Ask about your sources — e.g. <span className="font-mono text-brand-cyan">"How does authentication work?"</span>
-          </div>
-        )}
+        {messages.length === 0 && <WelcomeState readyDocs={readyDocs} onAsk={runQuery} />}
         {messages.map((m, i) => {
           const thinking = m.role === "assistant" && m.content === "" && busy && i === messages.length - 1;
           return (
@@ -151,7 +193,6 @@ export function ChatPanel({ cid, readyDocs, onOpenSource }: {
                     ? <Answer content={m.content} citations={m.citations} onOpenSource={onOpenSource} />
                     : <div className="whitespace-pre-wrap text-sm leading-relaxed">{m.content}</div>
                 )}
-
                 {m.role === "assistant" && m.content && !thinking && (
                   <button onClick={() => speak(i, m.content)}
                     className="mt-2 inline-flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-brand-cyan">
@@ -159,7 +200,6 @@ export function ChatPanel({ cid, readyDocs, onOpenSource }: {
                     {speaking === i ? "Stop" : "Read aloud"}
                   </button>
                 )}
-
                 {m.citations && m.citations.length > 0 && (
                   <div className="mt-3 border-t border-white/10 pt-2.5">
                     <div className="mb-1.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">Sources</div>
@@ -181,10 +221,19 @@ export function ChatPanel({ cid, readyDocs, onOpenSource }: {
         <div ref={endRef} />
       </div>
 
-      <form onSubmit={send} className="flex gap-2 border-t border-border/60 p-3">
-        <Input placeholder="Ask Nexus about your sources…" value={input}
-          onChange={(e) => setInput(e.target.value)} disabled={busy} className="glass border-white/10" />
-        <Button type="submit" className="glow-blue" disabled={busy}><Send className="h-4 w-4" /></Button>
+      {/* premium input */}
+      <form onSubmit={(e) => { e.preventDefault(); runQuery(input); }} className="p-3">
+        <div className="glass flex items-center gap-2 rounded-2xl p-1.5 pl-4 shadow-lg transition-shadow focus-within:shadow-[0_0_0_1px_hsl(var(--brand-purple)/0.55),0_0_36px_-8px_hsl(var(--brand-purple)/0.55)]">
+          <input
+            value={input} onChange={(e) => setInput(e.target.value)} disabled={busy}
+            placeholder="Ask Nexus about your sources…"
+            className="flex-1 bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground" />
+          <motion.button type="submit" disabled={busy || !input.trim()}
+            whileTap={{ scale: 0.9 }} whileHover={{ scale: 1.05 }}
+            className="grid h-9 w-9 place-items-center rounded-xl bg-brand-purple text-white shadow-[0_0_24px_-6px_hsl(var(--brand-purple)/0.9)] disabled:opacity-40">
+            <Send className="h-4 w-4" />
+          </motion.button>
+        </div>
       </form>
     </div>
   );
