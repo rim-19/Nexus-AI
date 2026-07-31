@@ -45,7 +45,7 @@ export function SourceViewer({ citation, onClose }: { citation: Citation | null;
               <button onClick={onClose} className="text-muted-foreground hover:text-foreground"><X className="h-5 w-5" /></button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4">
+            <div data-lenis-prevent className="flex-1 overflow-y-auto p-4">
               {loading && (
                 <div className="flex items-center gap-2 p-6 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin" /> Opening source…

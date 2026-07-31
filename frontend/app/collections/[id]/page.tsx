@@ -40,16 +40,17 @@ export default function CollectionPage() {
       {err && <p className="p-4 text-sm text-destructive">{err}</p>}
 
       <div className="grid flex-1 grid-cols-1 overflow-hidden md:grid-cols-[300px_1fr]">
-        <aside className={`glass flex-col gap-3 overflow-hidden border-y-0 border-l-0 p-4 ${
+        <aside className={`glass flex-col overflow-hidden border-y-0 border-l-0 ${
           showPanel ? "absolute inset-0 z-20 flex bg-background/95 md:static md:bg-transparent" : "hidden"} md:flex`}>
-          <div className="min-h-[220px] flex-[0_0_44%]">
-            <KnowledgeGraph readyDocs={readyDocs} onOpenFile={openFile} />
-          </div>
-          <div className="flex-1 overflow-hidden border-t border-white/10 pt-3">
-            <DocumentsPanel cid={id} onReadyDoc={setReadyDocs} />
-          </div>
           <button onClick={() => setShowPanel(false)}
-            className="glass rounded-lg py-2 text-xs md:hidden">Close panel</button>
+            className="glass m-3 mb-0 rounded-lg py-2 text-xs md:hidden">Close panel</button>
+          {/* single, adjustable scroll column — wheel scrolls anywhere (data-lenis-prevent) */}
+          <div data-lenis-prevent className="flex-1 space-y-6 overflow-y-auto p-4">
+            <KnowledgeGraph readyDocs={readyDocs} onOpenFile={openFile} />
+            <div className="border-t border-white/10 pt-5">
+              <DocumentsPanel cid={id} onReadyDoc={setReadyDocs} />
+            </div>
+          </div>
         </aside>
 
         <section className="overflow-hidden">

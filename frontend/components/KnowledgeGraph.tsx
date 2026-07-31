@@ -18,8 +18,11 @@ export function KnowledgeGraph({ readyDocs, onOpenFile }: {
 
   if (!doc || files.length === 0) {
     return (
-      <div className="grid h-full place-items-center text-center text-xs text-muted-foreground">
-        Knowledge map appears once a source is indexed.
+      <div>
+        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Knowledge Map</h2>
+        <p className="rounded-lg border border-dashed border-white/10 p-4 text-center text-xs text-muted-foreground">
+          Appears once a source is indexed.
+        </p>
       </div>
     );
   }
@@ -33,9 +36,9 @@ export function KnowledgeGraph({ readyDocs, onOpenFile }: {
   const short = (p: string) => p.split("/").pop() || p;
 
   return (
-    <div className="flex h-full flex-col">
-      <h2 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Knowledge Map</h2>
-      <svg viewBox="0 0 200 200" className="w-full flex-1">
+    <div>
+      <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Knowledge Map</h2>
+      <svg viewBox="0 0 200 200" className="mx-auto h-44 w-44">
         {nodes.map((n, i) => (
           <motion.line key={"l" + i} x1={cx} y1={cy} x2={n.x} y2={n.y}
             stroke="hsl(var(--brand-blue))" strokeWidth="0.5"
@@ -56,12 +59,13 @@ export function KnowledgeGraph({ readyDocs, onOpenFile }: {
           </g>
         ))}
       </svg>
-      <div className="mt-1 max-h-24 space-y-0.5 overflow-y-auto">
-        {files.slice(0, 6).map((f) => (
+      <div className="mt-3 space-y-1">
+        {files.map((f) => (
           <button key={f.file_path} onClick={() => onOpenFile(doc.id, f.file_path)}
-            className="flex w-full items-center justify-between gap-2 rounded px-1.5 py-0.5 text-left font-mono text-[10px] text-muted-foreground hover:bg-white/5 hover:text-foreground">
-            <span className="truncate">{short(f.file_path)}</span>
-            <span className="text-brand-cyan">{f.chunks}</span>
+            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left transition-colors hover:bg-white/5">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-brand-purple" />
+            <span className="flex-1 truncate font-mono text-[11px] text-foreground/80">{short(f.file_path)}</span>
+            <span className="shrink-0 rounded bg-brand-cyan/15 px-1.5 font-mono text-[10px] text-brand-cyan">{f.chunks}</span>
           </button>
         ))}
       </div>

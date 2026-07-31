@@ -89,7 +89,7 @@ export function CommandPalette() {
                 className="h-14 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground" />
               <kbd className="rounded bg-white/5 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">ESC</kbd>
             </div>
-            <div className="max-h-80 overflow-y-auto p-2">
+            <div data-lenis-prevent className="max-h-80 overflow-y-auto p-2">
               {items.length === 0 && (
                 <div className="px-3 py-6 text-center text-sm text-muted-foreground">
                   {q.trim() ? "No matches" : "Type to search your knowledge base"}

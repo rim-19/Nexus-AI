@@ -4,32 +4,33 @@
 
 @layer base {
   :root {
-    /* Nexus AI — dark-first "Mission Control" */
-    --background: 240 11% 4%;        /* #09090B */
+    /* Nexus AI — 2026 SaaS Innovator palette (ultraviolet / electric-pink / lime) */
+    --background: 235 37% 7%;         /* Dark Matter #0C0D1A */
     --foreground: 210 40% 98%;
-    --card: 228 13% 8%;              /* #111216 */
+    --card: 222 26% 12%;             /* Side nav #1B212D */
     --card-foreground: 210 40% 98%;
-    --popover: 228 13% 7%;
+    --popover: 222 26% 10%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%;          /* electric blue */
+    --primary: 310 100% 62%;         /* Electric Pink / Fusion #FF3FDF (primary CTA) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 228 13% 12%;
+    --secondary: 220 20% 18%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 228 13% 12%;
-    --muted-foreground: 220 12% 60%;
-    --accent: 228 13% 14%;
+    --muted: 220 18% 16%;
+    --muted-foreground: 216 14% 64%;  /* Cyber Gray #4D5663 */
+    --accent: 220 20% 18%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 72% 51%;
+    --destructive: 353 93% 67%;      /* Alert #F95C6E */
     --destructive-foreground: 0 0% 100%;
-    --border: 240 6% 16%;
-    --input: 240 6% 16%;
-    --ring: 217 91% 60%;
+    --border: 222 18% 21%;
+    --input: 222 18% 21%;
+    --ring: 310 100% 62%;
     --radius: 0.75rem;
 
     /* brand accents */
-    --brand-blue: 217 91% 60%;
-    --brand-purple: 265 89% 66%;
-    --brand-cyan: 190 95% 55%;
+    --brand-blue: 278 100% 52%;      /* Ultraviolet Flow #B200FF */
+    --brand-purple: 310 100% 62%;    /* Electric Pink #FF3FDF */
+    --brand-cyan: 184 100% 50%;      /* Active Cyan #00F0FF */
+    --brand-lime: 76 100% 50%;       /* Digital Lime #BBFF00 */
   }
 }
 

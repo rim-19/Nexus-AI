@@ -58,7 +58,7 @@ export function DocumentsPanel({ cid, onReadyDoc }: { cid: string; onReadyDoc?: 
   }
 
   return (
-    <div className="flex h-full flex-col gap-4">
+    <div className="space-y-4">
       <div>
         <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Sources</h2>
 
@@ -88,29 +88,33 @@ export function DocumentsPanel({ cid, onReadyDoc }: { cid: string; onReadyDoc?: 
         {err && <p className="mt-2 text-xs text-destructive">{err}</p>}
       </div>
 
-      <div className="flex-1 space-y-2 overflow-y-auto">
+      <div className="space-y-2.5">
         {docs.length === 0 && <RobotEmpty title="No sources yet" subtitle="Drop a doc or add a repo" />}
         {docs.map((d) => (
           <motion.div key={d.id} initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }}
-            className="glass rounded-lg p-2.5 text-sm">
-            <div className="flex items-center gap-2">
-              {d.source_type === "github" ? <Github className="h-4 w-4 shrink-0" /> : <FileText className="h-4 w-4 shrink-0" />}
+            className="glass rounded-xl p-3">
+            <div className="flex items-start gap-2.5">
+              <span className="mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-white/5">
+                {d.source_type === "github" ? <Github className="h-3.5 w-3.5" /> : <FileText className="h-3.5 w-3.5" />}
+              </span>
               <div className="min-w-0 flex-1">
-                <div className="truncate font-mono text-xs">{d.source_ref}</div>
-                <div className="mt-1 flex items-center gap-2">
+                <div className="truncate font-mono text-xs text-foreground/90">{d.source_ref}</div>
+                <div className="mt-1.5 flex items-center gap-2">
                   <Badge className={statusStyle[d.status]}>
                     {(d.status === "indexing" || d.status === "pending") && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
                     {d.status}
                   </Badge>
-                  {d.status === "ready" && <span className="font-mono text-[10px] text-muted-foreground">{d.num_chunks} chunks</span>}
+                  {d.status === "ready" && (
+                    <span className="font-mono text-[10px] text-muted-foreground">{d.num_chunks} chunks</span>
+                  )}
                 </div>
               </div>
-              <button onClick={() => remove(d.id)} className="text-muted-foreground transition-colors hover:text-destructive">
+              <button onClick={() => remove(d.id)} className="shrink-0 text-muted-foreground transition-colors hover:text-destructive">
                 <Trash2 className="h-4 w-4" />
               </button>
             </div>
-            {(d.status === "indexing" || d.status === "pending") && <div className="mt-2"><ChunkBurst /></div>}
-            {d.status === "failed" && d.error && <div className="mt-1 text-xs text-destructive">{d.error}</div>}
+            {(d.status === "indexing" || d.status === "pending") && <div className="mt-2.5"><ChunkBurst /></div>}
+            {d.status === "failed" && d.error && <div className="mt-2 text-xs text-destructive">{d.error}</div>}
           </motion.div>
         ))}
       </div>

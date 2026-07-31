@@ -23,6 +23,7 @@ const config: Config = {
           blue: "hsl(var(--brand-blue))",
           purple: "hsl(var(--brand-purple))",
           cyan: "hsl(var(--brand-cyan))",
+          lime: "hsl(var(--brand-lime))",
         },
       },
       fontFamily: {
