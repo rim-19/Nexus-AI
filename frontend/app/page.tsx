@@ -2,13 +2,17 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { ArrowRight, ChevronDown, Sparkles, Check } from "lucide-react";
 import { Background } from "@/components/Background";
-import { KnowledgeBrain } from "@/components/hero/KnowledgeBrain";
 import { HeroMockup } from "@/components/hero/HeroMockup";
 import { Magnetic } from "@/components/interactions";
 import { isAuthed } from "@/lib/api";
+
+const AiCore = dynamic(() => import("@/components/three/AiCore").then((m) => m.AiCore), {
+  ssr: false, loading: () => null,
+});
 
 const BADGES = ["Hybrid Search", "Source Citations", "GitHub", "PDFs", "Markdown", "Self-Evaluating"];
 
@@ -47,12 +51,12 @@ export default function Landing() {
       <section className="relative flex min-h-[calc(100vh-80px)] flex-col items-center justify-center overflow-hidden px-6 text-center">
         {/* soft ambient radial lighting */}
         <div className="pointer-events-none absolute left-1/2 top-1/2 z-0 h-[620px] w-[620px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-blue/10 blur-[150px]" />
-        {/* knowledge-graph focal point (parallax) */}
-        <motion.div style={{ x: brainX, y: brainY }} className="absolute inset-0 z-0">
-          <KnowledgeBrain />
+        {/* 3D AI Core focal point (parallax) */}
+        <motion.div style={{ x: brainX, y: brainY }} className="pointer-events-none absolute inset-0 z-0">
+          <AiCore />
         </motion.div>
-        {/* keep the headline crisp over the graph */}
-        <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_40%_50%_at_center,hsl(var(--background))_10%,transparent_70%)]" />
+        {/* keep the headline crisp over the core */}
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-[radial-gradient(ellipse_38%_46%_at_center,hsl(var(--background))_0%,transparent_72%)]" />
 
         <div className="relative z-10 flex flex-col items-center">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
